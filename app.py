@@ -5,9 +5,9 @@ import feedparser
 app = Flask(__name__)
 
 def get_market_data():
-    # 1. 精確國債數據
+    # 1. 國債數據 (維持現狀)
     treasury_tickers = {
-        "1Y": "^IRX", 
+        "1Y": "^IRX",  
         "5Y": "^FVX", 
         "10Y": "^TNX", 
         "30Y": "^TYX"
@@ -15,27 +15,28 @@ def get_market_data():
     rates = {}
     for label, ticker in treasury_tickers.items():
         try:
-            # 獲取最新價格 (Yield %)
             data = yf.Ticker(ticker)
             val = data.fast_info['last_price']
             rates[label] = f"{val:.2f}%"
         except:
             rates[label] = "N/A"
 
-    # 2. Yahoo Finance 美股新聞 (透過 RSS 抓取，不會被擋)
+    # 2. Yahoo 財經繁體中文新聞 (直接抓取中文源)
     news_data = []
     try:
-        # 這是 Yahoo Finance 官方的 RSS 源
-        rss_url = "https://finance.yahoo.com/news/rss"
+        # 使用 Yahoo 財經香港的全球新聞 RSS
+        rss_url = "https://hk.finance.yahoo.com/news/rss"
         feed = feedparser.parse(rss_url)
-        for entry in feed.entries[:6]: # 抓前 6 條
+        
+        # 抓取前 6 則中文新聞
+        for entry in feed.entries[:6]:
             news_data.append({
                 "title": entry.title,
                 "link": entry.link,
-                "time": entry.published[17:22] # 只取時間部分
+                "time": entry.published[17:22] if 'published' in entry else "即時"
             })
     except:
-        news_data = [{"title": "新聞抓取暫時不可用", "link": "#", "time": ""}]
+        news_data = [{"title": "暫時無法獲取中文新聞", "link": "#", "time": ""}]
 
     return rates, news_data
 
