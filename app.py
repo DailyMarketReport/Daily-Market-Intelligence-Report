@@ -8,7 +8,6 @@ def get_market_data():
     # 1. 精確國債數據
     treasury_tickers = {
         "1Y": "^IRX", 
-        "2Y": "2Y=F", 
         "5Y": "^FVX", 
         "10Y": "^TNX", 
         "30Y": "^TYX"
