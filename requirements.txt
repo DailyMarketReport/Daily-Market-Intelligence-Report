@@ -4,3 +4,4 @@ beautifulsoup4
 pandas
 gunicorn
 yfinance
+googletrans==4.0.0-rc1
