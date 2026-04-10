@@ -43,13 +43,15 @@
             </div>
         </div>
 
-        <div class="card">
-            <h2>📰 Yahoo Finance 實時快訊</h2>
-            {% for item in news %}
-            <div class="news-item">
-                <span class="news-time">{{ item.time }}</span>
-                <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
-            </div>
+       <div class="card">
+    <h2>🏮 Yahoo 財經即時快訊 (繁體中文)</h2>
+    {% for item in news %}
+    <div class="news-item">
+        <span class="news-time">{{ item.time }}</span>
+        <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
+    </div>
+    {% endfor %}
+</div>
             {% endfor %}
         </div>
     </div>
