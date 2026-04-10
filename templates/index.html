@@ -2,90 +2,36 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market Intelligence Report </title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Victor's Market Intelligence</title>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #38bdf8; --green: #22c55e; --red: #ef4444; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }
-        .container { max-width: 900px; margin: 0 auto; }
-        header { text-align: center; padding: 2rem 0; border-bottom: 1px solid #334155; margin-bottom: 2rem; }
-        h1 { color: var(--accent); margin: 0; font-size: 1.8rem; }
-        .status-tag { display: inline-block; background: #065f46; color: #34d399; padding: 2px 12px; border-radius: 99px; font-size: 0.75rem; margin-top: 10px; }
-        
-        /* 表格樣式 */
-        .table-container { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #334155; padding: 15px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
-        td { padding: 15px; border-bottom: 1px solid #334155; font-size: 0.95rem; }
-        tr:last-child td { border-bottom: none; }
-        
-        /* 數據顏色控制 */
-        .up { color: var(--green); font-weight: 600; }
-        .down { color: var(--red); font-weight: 600; }
-        .highlight { color: var(--accent); font-weight: 600; }
-
-        @media (max-width: 600px) {
-            th, td { padding: 10px; font-size: 0.85rem; }
-        }
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .news-item { border-bottom: 1px solid #334155; padding: 10px 0; }
+        .rate-grid { display: flex; gap: 20px; }
+        .rate-box { background: #334155; padding: 10px 20px; border-radius: 5px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📊 Daily Market Intelligence</h1>
-            <div class="status-tag">● 實時數據已更新</div>
-            <p style="color: #94a3b8; margin-top: 15px;">Seeking Alpha & Finviz 綜合分析報告</p>
-        </header>
+    <h1>📊 市場情報監控</h1>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>市場板塊 / 指標</th>
-                        <th>最新數值</th>
-                        <th>變動 (%)</th>
-                        <th>信號 (Signal)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="highlight">S&P 500 (SPY)</td>
-                        <td>5,210.45</td>
-                        <td class="up">+1.25%</td>
-                        <td>🔥 強勢看多</td>
-                    </tr>
-                    <tr>
-                        <td class="highlight">Nasdaq (QQQ)</td>
-                        <td>18,340.20</td>
-                        <td class="up">+1.82%</td>
-                        <td>🔥 強勢看多</td>
-                    </tr>
-                    <tr>
-                        <td>十年期美債收益率</td>
-                        <td>4.32%</td>
-                        <td class="down">-0.05%</td>
-                        <td>⚖️ 趨於穩定</td>
-                    </tr>
-                    <tr>
-                        <td>恐慌指數 (VIX)</td>
-                        <td>13.20</td>
-                        <td class="down">-4.10%</td>
-                        <td>🛡️ 風險偏好</td>
-                    </tr>
-                    <tr>
-                        <td class="highlight">NVDA (NVIDIA)</td>
-                        <td>885.30</td>
-                        <td class="up">+2.45%</td>
-                        <td>🚀 AI 領漲</td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="card">
+        <h2>🇺🇸 美國國債利率</h2>
+        <div class="rate-grid">
+            {% for tenor, val in rates.items() %}
+            <div class="rate-box">
+                <strong>{{ tenor }}:</strong> {{ val }}
+            </div>
+            {% endfor %}
         </div>
+    </div>
 
-        <footer style="text-align: center; margin-top: 3rem; color: #475569; font-size: 0.8rem;">
-            © 2026 Victor Market Report. 本網頁透過 Cloud Run 自動部署。
-        </footer>
+    <div class="card">
+        <h2>🔥 Finviz 即時新聞</h2>
+        {% for item in news %}
+        <div class="news-item">
+            <small>{{ item.time }}</small> | <strong>{{ item.title }}</strong>
+        </div>
+        {% endfor %}
     </div>
 </body>
 </html>
