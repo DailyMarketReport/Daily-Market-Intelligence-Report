@@ -2,36 +2,42 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Victor's Market Intelligence</title>
+    <title>Victor's Live Market</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
-        .card { background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .news-item { border-bottom: 1px solid #334155; padding: 10px 0; }
-        .rate-grid { display: flex; gap: 20px; }
-        .rate-box { background: #334155; padding: 10px 20px; border-radius: 5px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; }
+        .rate-grid { display: flex; gap: 15px; }
+        .rate-box { background: #0ea5e9; padding: 10px; border-radius: 5px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+        .up { color: #4ade80; }
+        .down { color: #f87171; }
     </style>
 </head>
 <body>
-    <h1>📊 市場情報監控</h1>
+    <h1>📊 實時市場監控 (Live Data)</h1>
 
     <div class="card">
-        <h2>🇺🇸 美國國債利率</h2>
+        <h3>🇺🇸 美國國債收益率 (Treasury Yields)</h3>
         <div class="rate-grid">
-            {% for tenor, val in rates.items() %}
-            <div class="rate-box">
-                <strong>{{ tenor }}:</strong> {{ val }}
-            </div>
+            {% for label, val in rates.items() %}
+            <div class="rate-box">{{ label }}: {{ val }}</div>
             {% endfor %}
         </div>
     </div>
 
     <div class="card">
-        <h2>🔥 Finviz 即時新聞</h2>
-        {% for item in news %}
-        <div class="news-item">
-            <small>{{ item.time }}</small> | <strong>{{ item.title }}</strong>
-        </div>
-        {% endfor %}
+        <h3>🚀 Mega 7 科技巨頭</h3>
+        <table>
+            <tr><th>代碼</th><th>現價</th><th>今日漲跌</th></tr>
+            {% for stock in mega7 %}
+            <tr>
+                <td><strong>{{ stock.ticker }}</strong></td>
+                <td>{{ stock.price }}</td>
+                <td class="{{ 'up' if '+' in stock.change else 'down' }}">{{ stock.change }}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 </body>
 </html>
