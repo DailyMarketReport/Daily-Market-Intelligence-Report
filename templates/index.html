@@ -4,35 +4,39 @@
     <meta charset="UTF-8">
     <title>Victor Market Intelligence</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f1f5f9; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #334155; }
-        h2 { border-left: 4px solid #38bdf8; padding-left: 10px; font-size: 1.2rem; }
+        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #f1f5f9; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: #1e293b; padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #334155; }
+        h2 { font-size: 1.1rem; color: #38bdf8; margin-bottom: 20px; border-left: 4px solid #38bdf8; padding-left: 12px; }
         
-        /* 國債網格 */
-        .rate-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
-        .rate-box { background: #334155; padding: 15px; border-radius: 8px; text-align: center; }
-        .rate-label { font-size: 0.8rem; color: #94a3b8; display: block; }
-        .rate-val { font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
+        /* 國債樣式 */
+        .rate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+        .rate-box { background: #334155; padding: 15px; border-radius: 12px; text-align: center; transition: 0.3s; }
+        .rate-box:hover { background: #475569; }
+        .rate-label { font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 5px; }
+        .rate-val { font-size: 1.2rem; font-weight: bold; color: #ffffff; }
 
-        /* 新聞列表 */
-        .news-item { padding: 15px 0; border-bottom: 1px solid #334155; }
+        /* 新聞樣式 */
+        .news-item { padding: 12px 0; border-bottom: 1px solid #334155; display: flex; align-items: flex-start; }
         .news-item:last-child { border-bottom: none; }
-        .news-link { color: #38bdf8; text-decoration: none; font-weight: 600; display: block; margin-bottom: 5px; }
-        .news-cn { color: #e2e8f0; font-size: 0.95rem; }
-        .publisher { font-size: 0.75rem; color: #64748b; margin-top: 5px; }
+        .news-time { font-size: 0.75rem; color: #64748b; background: #0f172a; padding: 2px 6px; border-radius: 4px; margin-right: 12px; margin-top: 4px; }
+        .news-link { color: #e2e8f0; text-decoration: none; line-height: 1.5; font-size: 0.95rem; }
+        .news-link:hover { color: #38bdf8; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 市場情報監控中心</h1>
+        <header style="margin-bottom: 30px;">
+            <h1 style="font-size: 1.5rem; margin: 0;">📊 市場情報監控中心</h1>
+            <p style="color: #64748b; font-size: 0.8rem; margin-top: 5px;">Real-time Market Data Dashboard</p>
+        </header>
 
         <div class="card">
-            <h2>🇺🇸 美國國債收益率 (Treasury Yields)</h2>
+            <h2>🇺🇸 美國國債收益率</h2>
             <div class="rate-grid">
                 {% for label, val in rates.items() %}
                 <div class="rate-box">
-                    <span class="rate-label">{{ label }}</span>
+                    <span class="rate-label">{{ label }}期</span>
                     <span class="rate-val">{{ val }}</span>
                 </div>
                 {% endfor %}
@@ -40,12 +44,11 @@
         </div>
 
         <div class="card">
-            <h2>📰 Yahoo Finance 美股焦點新聞</h2>
+            <h2>📰 Yahoo Finance 實時快訊</h2>
             {% for item in news %}
             <div class="news-item">
+                <span class="news-time">{{ item.time }}</span>
                 <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
-                <div class="news-cn">🏮 {{ item.translated_title }}</div>
-                <div class="publisher">來源: {{ item.publisher }}</div>
             </div>
             {% endfor %}
         </div>
