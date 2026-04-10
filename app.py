@@ -1,51 +1,42 @@
 from flask import Flask, render_template
 import yfinance as yf
-from googletrans import Translator
+import feedparser
 
 app = Flask(__name__)
-translator = Translator()
-
-def safe_translate(text):
-    try:
-        # 將英文新聞標題翻譯成繁體中文
-        return translator.translate(text, src='en', dest='zh-tw').text
-    except:
-        return text # 失敗則回傳原文
 
 def get_market_data():
-    # 1. 擴充國債收益率
-    # ^IRX(13W), ^FVX(5Y), ^TNX(10Y) 是標準的，1Y, 3Y, 7Y 我們用具體的債券代碼或估值
-    treasury_map = {
-        "1Y": "^IRX", # 這裡通常用3個月貼近代現，或者用 SHY 指數參考
-        "3Y": "^FVX", # 5Y 代替參考
-        "5Y": "^FVX",
-        "7Y": "^TNX", # 10Y 代替參考
-        "10Y": "^TNX"
+    # 1. 精確國債數據
+    treasury_tickers = {
+        "1Y": "^IRX", 
+        "2Y": "2Y=F", 
+        "5Y": "^FVX", 
+        "10Y": "^TNX", 
+        "30Y": "^TYX"
     }
-    # 為了數據精確，我們直接抓取 Yahoo Finance 的 Treasury Yields 頁面常用 Ticker
     rates = {}
-    for label, ticker in {"1Y":"^IRX", "3Y":"^FVX", "5Y":"^FVX", "7Y":"^TNX", "10Y":"^TNX"}.items():
+    for label, ticker in treasury_tickers.items():
         try:
-            val = yf.Ticker(ticker).fast_info['last_price']
+            # 獲取最新價格 (Yield %)
+            data = yf.Ticker(ticker)
+            val = data.fast_info['last_price']
             rates[label] = f"{val:.2f}%"
         except:
             rates[label] = "N/A"
 
-    # 2. Yahoo Finance 美股新聞
+    # 2. Yahoo Finance 美股新聞 (透過 RSS 抓取，不會被擋)
     news_data = []
     try:
-        # 抓取 S&P 500 (SPY) 相關新聞
-        ticker_news = yf.Ticker("SPY").news[:5]
-        for item in ticker_news:
-            raw_title = item['title']
+        # 這是 Yahoo Finance 官方的 RSS 源
+        rss_url = "https://finance.yahoo.com/news/rss"
+        feed = feedparser.parse(rss_url)
+        for entry in feed.entries[:6]: # 抓前 6 條
             news_data.append({
-                "title": raw_title,
-                "translated_title": safe_translate(raw_title),
-                "link": item['link'],
-                "publisher": item.get('publisher', 'Yahoo Finance')
+                "title": entry.title,
+                "link": entry.link,
+                "time": entry.published[17:22] # 只取時間部分
             })
     except:
-        pass
+        news_data = [{"title": "新聞抓取暫時不可用", "link": "#", "time": ""}]
 
     return rates, news_data
 
