@@ -1,20 +1,17 @@
-# 第一階段：使用 Nginx 鏡像
-FROM nginx:alpine
+# 使用 Python 官方輕量鏡像
+FROM python:3.9-slim
 
-# 複製 index.html 到 Nginx 預設目錄
-COPY index.html /usr/share/nginx/html/index.html
+# 設定工作目錄
+WORKDIR /app
 
-# 強制 Nginx 監聽 8080 端口，並確保配置正確
-RUN printf 'server {\n\
-    listen 8080;\n\
-    location / {\n\
-        root /usr/share/nginx/html;\n\
-        index index.html;\n\
-    }\n\
-}\n' > /etc/nginx/conf.d/default.conf
+# 複製所有檔案到容器中
+COPY . .
 
-# 宣告 8080 端口
-EXPOSE 8080
+# 安裝必要的 Python 套件
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 啟動 Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# 讓 Flask 知道在哪個 Port 運行
+ENV PORT 8080
+
+# 啟動命令
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
