@@ -3,143 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market Intelligence Pro</title>
+    <title>Mag 7 & Market Intelligence</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #0a1120; color: #f1f5f9; margin: 0; padding: 0; }
         .dashboard { padding: 20px; max-width: 1400px; margin: 0 auto; }
         .card { background: #161e2e; border-radius: 12px; border: 1px solid #2d3748; padding: 20px; margin-bottom: 20px; }
         h2 { font-size: 1rem; color: #38bdf8; margin-top: 0; margin-bottom: 15px; border-left: 4px solid #38bdf8; padding-left: 10px; }
         
-        /* 佈局 */
-        .main-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
+        /* 雙欄佈局 */
+        .layout-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        @media (max-width: 1000px) { .layout-grid { grid-template-columns: 1fr; } }
 
-        /* 圖表放大 */
-        .chart-container { height: 600px; width: 100%; border-radius: 8px; overflow: hidden; }
+        /* 圖表高度 */
+        .chart-main { height: 500px; border-radius: 8px; overflow: hidden; }
         
         /* 國債樣式 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
-        .box { background: #1f293a; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #2d3748; }
-        .label { font-size: 0.7rem; color: #94a3b8; display: block; }
-        .val { font-size: 1.1rem; font-weight: bold; color: #ffffff; }
+        .rate-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+        .rate-box { background: #1f293a; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #2d3748; }
+        .rate-label { font-size: 0.7rem; color: #94a3b8; display: block; }
+        .rate-val { font-size: 1.1rem; font-weight: bold; color: #ffffff; }
+
+        /* 新聞列表 */
+        .news-list { max-height: 550px; overflow-y: auto; padding-right: 5px; }
+        .news-item { padding: 12px 0; border-bottom: 1px solid #2d3748; display: flex; align-items: flex-start; }
+        .news-time { font-size: 0.7rem; color: #64748b; background: #0a1120; padding: 2px 6px; border-radius: 4px; margin-right: 12px; min-width: 40px; text-align: center; }
+        .news-link { color: #e2e8f0; text-decoration: none; font-size: 0.95rem; line-height: 1.5; }
+        .news-link:hover { color: #38bdf8; }
     </style>
 </head>
 <body>
 
     <div style="border-bottom: 1px solid #2d3748;">
         <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
             <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
             {
             "symbols": [
-                {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500"},
-                {"proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100"},
-                {"proName": "FX_IDC:USDHKD", "title": "USD/HKD"},
-                {"proName": "BITSTAMP:BTCUSD", "title": "Bitcoin"},
-                {"description": "NVDA", "proName": "NASDAQ:NVDA"},
-                {"description": "Apple", "proName": "NASDAQ:AAPL"}
+                {"proName": "NASDAQ:NVDA", "title": "NVDA"},
+                {"proName": "NASDAQ:AAPL", "title": "Apple"},
+                {"proName": "NASDAQ:MSFT", "title": "Microsoft"},
+                {"proName": "NASDAQ:AMZN", "title": "Amazon"},
+                {"proName": "NASDAQ:GOOGL", "title": "Google"},
+                {"proName": "NASDAQ:META", "title": "Meta"},
+                {"proName": "NASDAQ:TSLA", "title": "Tesla"}
             ],
-            "showSymbolLogo": true,
-            "colorTheme": "dark",
-            "isTransparent": false,
-            "displayMode": "adaptive",
-            "locale": "zh_TW"
+            "colorTheme": "dark", "locale": "zh_TW"
             }
             </script>
         </div>
     </div>
 
     <div class="dashboard">
-        <div class="main-layout">
-            
-            <div class="left-col">
-                <div class="card">
-                    <h2>📈 S&P 500 指數主圖 (日線)</h2>
-                    <div class="chart-container">
-                        <div id="tv_main_chart" style="height:100%;width:100%"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-                        <script type="text/javascript">
-                        new TradingView.widget({
-                            "autosize": true,
-                            "symbol": "CME_MINI:ES1!",
-                            "interval": "D",
-                            "timezone": "America/New_York",
-                            "theme": "dark",
-                            "style": "1",
-                            "locale": "zh_TW",
-                            "toolbar_bg": "#f1f3f6",
-                            "enable_publishing": false,
-                            "withdateranges": true,
-                            "hide_side_toolbar": false,
-                            "allow_symbol_change": true,
-                            "container_id": "tv_main_chart"
-                        });
-                        </script>
-                    </div>
+        
+        <div class="card">
+            <h2>美國國債收益率</h2>
+            <div class="rate-grid">
+                {% for label, val in rates.items() %}
+                <div class="rate-box">
+                    <span class="rate-label">{{ label }}期</span>
+                    <span class="rate-val">{{ val }}</span>
                 </div>
+                {% endfor %}
+            </div>
+        </div>
 
-                <div class="card">
-                    <h2>🇺🇸 美國國債收益率</h2>
-                    <div class="grid">
-                        {% for label, val in rates.items() %}
-                        <div class="box">
-                            <span class="label">{{ label }}期</span>
-                            <span class="val">{{ val }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
+        <div class="layout-grid">
+            
+            <div class="card">
+                <h2>MAG 7 最新資訊</h2>
+                <div class="chart-main">
+                    <div id="tv_mag7" style="height:100%;width:100%"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                    <script type="text/javascript">
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "NASDAQ:NVDA", // 以 NVDA 為主
+                        "interval": "D",
+                        "timezone": "America/New_York",
+                        "theme": "dark",
+                        "style": "1",
+                        "locale": "zh_TW",
+                        "enable_publishing": false,
+                        "allow_symbol_change": true,
+                        "watchlist": [
+                            "NASDAQ:NVDA",
+                            "NASDAQ:AAPL",
+                            "NASDAQ:MSFT",
+                            "NASDAQ:AMZN",
+                            "NASDAQ:GOOGL",
+                            "NASDAQ:META",
+                            "NASDAQ:TSLA"
+                        ],
+                        "container_id": "tv_mag7"
+                    });
+                    </script>
                 </div>
             </div>
 
-            <div class="right-col">
-                <div class="card" style="height: calc(100% - 40px); min-height: 600px; padding: 0;">
-                    <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
-                        {
-                        "colorTheme": "dark",
-                        "dateRange": "12M",
-                        "showChart": true,
-                        "locale": "zh_TW",
-                        "largeChartUrl": "",
-                        "isTransparent": false,
-                        "showSymbolLogo": true,
-                        "showFloatingTooltip": false,
-                        "width": "100%",
-                        "height": "100%",
-                        "plotLineColorGrowing": "rgba(41, 98, 255, 1)",
-                        "plotLineColorFalling": "rgba(41, 98, 255, 1)",
-                        "gridLineColor": "rgba(240, 243, 250, 0)",
-                        "scaleFontColor": "rgba(106, 109, 120, 1)",
-                        "belowLineFillColorGrowing": "rgba(41, 98, 255, 0.12)",
-                        "belowLineFillColorFalling": "rgba(41, 98, 255, 0.12)",
-                        "belowLineFillColorGrowingBottom": "rgba(41, 98, 255, 0)",
-                        "belowLineFillColorFallingBottom": "rgba(41, 98, 255, 0)",
-                        "symbolActiveColor": "rgba(41, 98, 255, 0.12)",
-                        "tabs": [
-                            {
-                            "title": "指數",
-                            "symbols": [
-                                {"s": "FOREXCOM:SPXUSD", "d": "S&P 500"},
-                                {"s": "FOREXCOM:NSXUSD", "d": "Nasdaq 100"},
-                                {"s": "FOREXCOM:DJI", "d": "Dow 30"},
-                                {"s": "INDEX:NKY", "d": "日經 225"},
-                                {"s": "INDEX:HSI", "d": "恒生指數"}
-                            ],
-                            "originalTitle": "Indices"
-                            },
-                            {
-                            "title": "大宗商品",
-                            "symbols": [
-                                {"s": "CME_MINI:GC1!", "d": "黃金"},
-                                {"s": "CME:CL1!", "d": "原油"},
-                                {"s": "CBOT:ZC1!", "d": "玉米"}
-                            ]
-                            }
-                        ]
-                        }
-                        </script>
-                    </div>
+            <div class="card">
+                <h2>🏮 Yahoo 財經即時快訊 (中文)</h2>
+                <div class="news-list">
+                    {% if news %}
+                        {% for item in news %}
+                        <div class="news-item">
+                            <span class="news-time">{{ item.time }}</span>
+                            <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
 
