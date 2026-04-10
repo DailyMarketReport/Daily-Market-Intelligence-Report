@@ -7,7 +7,7 @@ app = Flask(__name__)
 def get_market_data():
     # 1. 國債數據捕捉
     rates = {}
-    treasury_tickers = {"1Y": "^IRX", "5Y": "^FVX", "10Y": "^TNX", "30Y": "^TYX"}
+    treasury_tickers = {"1Y": "^IRX", "2Y": "2Y=F", "5Y": "^FVX", "10Y": "^TNX", "30Y": "^TYX"}
     
     try:
         for label, ticker in treasury_tickers.items():
