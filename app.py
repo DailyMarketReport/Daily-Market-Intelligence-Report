@@ -19,7 +19,7 @@ def get_market_data():
     news_data = []
     try:
         feed = feedparser.parse("https://hk.finance.yahoo.com/news/rss")
-        for entry in feed.entries[:6]:
+        for entry in feed.entries[:10]:
             news_data.append({
                 "title": entry.get('title', '無標題'),
                 "link": entry.get('link', '#'),
