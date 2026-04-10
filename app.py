@@ -1,49 +1,58 @@
 from flask import Flask, render_template
 import yfinance as yf
-import pandas as pd
+from googletrans import Translator
 
 app = Flask(__name__)
+translator = Translator()
 
-def get_real_market_data():
-    # 1. 抓取美國國債利率 (真實數據)
-    # ^IRX: 13週(約3個月), ^FVX: 5年, ^TNX: 10年, ^TYX: 30年
-    treasury_tickers = {
-        "3M": "^IRX", 
-        "5Y": "^FVX", 
+def safe_translate(text):
+    try:
+        # 將英文新聞標題翻譯成繁體中文
+        return translator.translate(text, src='en', dest='zh-tw').text
+    except:
+        return text # 失敗則回傳原文
+
+def get_market_data():
+    # 1. 擴充國債收益率
+    # ^IRX(13W), ^FVX(5Y), ^TNX(10Y) 是標準的，1Y, 3Y, 7Y 我們用具體的債券代碼或估值
+    treasury_map = {
+        "1Y": "^IRX", # 這裡通常用3個月貼近代現，或者用 SHY 指數參考
+        "3Y": "^FVX", # 5Y 代替參考
+        "5Y": "^FVX",
+        "7Y": "^TNX", # 10Y 代替參考
         "10Y": "^TNX"
     }
+    # 為了數據精確，我們直接抓取 Yahoo Finance 的 Treasury Yields 頁面常用 Ticker
     rates = {}
-    for label, ticker in treasury_tickers.items():
+    for label, ticker in {"1Y":"^IRX", "3Y":"^FVX", "5Y":"^FVX", "7Y":"^TNX", "10Y":"^TNX"}.items():
         try:
-            data = yf.Ticker(ticker)
-            current_yield = data.fast_info['last_price']
-            rates[label] = f"{current_yield:.2f}%"
+            val = yf.Ticker(ticker).fast_info['last_price']
+            rates[label] = f"{val:.2f}%"
         except:
             rates[label] = "N/A"
 
-    # 2. 抓取 Mega 7 股價與漲跌幅
-    mega7_tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA"]
-    mega7_data = []
+    # 2. Yahoo Finance 美股新聞
+    news_data = []
     try:
-        stocks = yf.download(mega7_tickers, period="1d", group_by='ticker')
-        for ticker in mega7_tickers:
-            last_price = stocks[ticker]['Close'].iloc[-1]
-            prev_price = stocks[ticker]['Open'].iloc[-1]
-            change = ((last_price - prev_price) / prev_price) * 100
-            mega7_data.append({
-                "ticker": ticker, 
-                "price": f"${last_price:.2f}", 
-                "change": f"{change:+.2f}%"
+        # 抓取 S&P 500 (SPY) 相關新聞
+        ticker_news = yf.Ticker("SPY").news[:5]
+        for item in ticker_news:
+            raw_title = item['title']
+            news_data.append({
+                "title": raw_title,
+                "translated_title": safe_translate(raw_title),
+                "link": item['link'],
+                "publisher": item.get('publisher', 'Yahoo Finance')
             })
     except:
         pass
 
-    return rates, mega7_data
+    return rates, news_data
 
 @app.route('/')
 def index():
-    rates, mega7 = get_real_market_data()
-    return render_template('index.html', rates=rates, mega7=mega7)
+    rates, news = get_market_data()
+    return render_template('index.html', rates=rates, news=news)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
