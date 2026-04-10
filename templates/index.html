@@ -2,42 +2,53 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Victor's Live Market</title>
+    <title>Victor Market Intelligence</title>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
-        .card { background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; }
-        .rate-grid { display: flex; gap: 15px; }
-        .rate-box { background: #0ea5e9; padding: 10px; border-radius: 5px; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
-        .up { color: #4ade80; }
-        .down { color: #f87171; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f1f5f9; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #334155; }
+        h2 { border-left: 4px solid #38bdf8; padding-left: 10px; font-size: 1.2rem; }
+        
+        /* 國債網格 */
+        .rate-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
+        .rate-box { background: #334155; padding: 15px; border-radius: 8px; text-align: center; }
+        .rate-label { font-size: 0.8rem; color: #94a3b8; display: block; }
+        .rate-val { font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
+
+        /* 新聞列表 */
+        .news-item { padding: 15px 0; border-bottom: 1px solid #334155; }
+        .news-item:last-child { border-bottom: none; }
+        .news-link { color: #38bdf8; text-decoration: none; font-weight: 600; display: block; margin-bottom: 5px; }
+        .news-cn { color: #e2e8f0; font-size: 0.95rem; }
+        .publisher { font-size: 0.75rem; color: #64748b; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <h1>📊 實時市場監控 (Live Data)</h1>
+    <div class="container">
+        <h1>📊 市場情報監控中心</h1>
 
-    <div class="card">
-        <h3>🇺🇸 美國國債收益率 (Treasury Yields)</h3>
-        <div class="rate-grid">
-            {% for label, val in rates.items() %}
-            <div class="rate-box">{{ label }}: {{ val }}</div>
+        <div class="card">
+            <h2>🇺🇸 美國國債收益率 (Treasury Yields)</h2>
+            <div class="rate-grid">
+                {% for label, val in rates.items() %}
+                <div class="rate-box">
+                    <span class="rate-label">{{ label }}</span>
+                    <span class="rate-val">{{ val }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📰 Yahoo Finance 美股焦點新聞</h2>
+            {% for item in news %}
+            <div class="news-item">
+                <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
+                <div class="news-cn">🏮 {{ item.translated_title }}</div>
+                <div class="publisher">來源: {{ item.publisher }}</div>
+            </div>
             {% endfor %}
         </div>
-    </div>
-
-    <div class="card">
-        <h3>🚀 Mega 7 科技巨頭</h3>
-        <table>
-            <tr><th>代碼</th><th>現價</th><th>今日漲跌</th></tr>
-            {% for stock in mega7 %}
-            <tr>
-                <td><strong>{{ stock.ticker }}</strong></td>
-                <td>{{ stock.price }}</td>
-                <td class="{{ 'up' if '+' in stock.change else 'down' }}">{{ stock.change }}</td>
-            </tr>
-            {% endfor %}
-        </table>
     </div>
 </body>
 </html>
