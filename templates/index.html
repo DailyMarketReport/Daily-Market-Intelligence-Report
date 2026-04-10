@@ -10,7 +10,6 @@
         .card { background: #161e2e; border-radius: 12px; border: 1px solid #2d3748; padding: 20px; margin-bottom: 20px; }
         h2 { font-size: 1.1rem; color: #38bdf8; margin-top: 0; margin-bottom: 15px; border-left: 4px solid #38bdf8; padding-left: 10px; }
         
-        /* 佈局控制 */
         .grid-2-1 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
         @media (max-width: 1100px) { .grid-2-1 { grid-template-columns: 1fr; } }
 
@@ -20,19 +19,17 @@
         .rate-val { font-size: 1.2rem; font-weight: bold; color: #ffffff; display: block; margin-top: 5px; }
 
         /* 分析報告摺疊樣式 */
-        details { background: #1f293a; border-radius: 8px; margin-bottom: 12px; border: 1px solid #334155; transition: 0.3s; }
+        details { background: #1f293a; border-radius: 8px; margin-bottom: 12px; border: 1px solid #334155; }
         details[open] { border-color: #38bdf8; }
         summary { padding: 12px 15px; cursor: pointer; font-weight: 600; color: #e2e8f0; outline: none; list-style: none; }
         summary::-webkit-details-marker { display: none; }
         summary:hover { background: #2d3748; }
         .report-inner { padding: 15px; border-top: 1px solid #334155; color: #94a3b8; font-size: 0.95rem; line-height: 1.6; background: #161e2e; }
 
-        /* Finviz 圖片樣式 */
-        .finviz-container { text-align: center; background: #000; border-radius: 8px; padding: 5px; }
-        .finviz-map { width: 100%; border-radius: 4px; display: block; filter: brightness(0.9); }
-        .finviz-map:hover { filter: brightness(1.05); }
+        /* 熱力圖容器 */
+        .heatmap-container { height: 400px; width: 100%; border-radius: 8px; overflow: hidden; }
 
-        /* 圖表容器 - 確保左側工具列有空間 */
+        /* 圖表容器 */
         .chart-frame { height: 600px; width: 100%; border-radius: 8px; overflow: visible; position: relative; }
         
         /* 新聞列表 */
@@ -40,9 +37,7 @@
         .news-item { padding: 12px 0; border-bottom: 1px solid #2d3748; display: flex; align-items: flex-start; }
         .news-time { font-size: 0.75rem; color: #64748b; background: #0a1120; padding: 2px 6px; border-radius: 4px; margin-right: 12px; min-width: 45px; text-align: center; }
         .news-link { color: #e2e8f0; text-decoration: none; font-size: 0.95rem; line-height: 1.5; }
-        .news-link:hover { color: #38bdf8; }
         
-        /* 滾動條美化 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0a1120; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -80,43 +75,53 @@
 
         <div class="grid-2-1">
             <div class="card">
-                <h2>📊 全球市場熱力圖 (Finviz)</h2>
-                <div class="finviz-container">
-                    <a href="https://finviz.com/map.ashx?t=sec" target="_blank">
-                        <img src="https://finviz.com/api/map.ashx?t=sec&s=md" class="finviz-map" alt="Market Heatmap">
-                    </a>
+                <h2>📊 全球市場熱力圖 (S&P 500)</h2>
+                <div class="heatmap-container">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+                        {
+                          "exchanges": [],
+                          "dataSource": "S&P500",
+                          "grouping": "sector",
+                          "blockSize": "market_cap_basic",
+                          "blockColor": "change",
+                          "locale": "zh_TW",
+                          "symbolUrl": "",
+                          "colorTheme": "dark",
+                          "hasTopBar": false,
+                          "isDatasetEnabled": false,
+                          "isTransparent": false,
+                          "hasSymbolTooltip": true,
+                          "width": "100%",
+                          "height": "100%"
+                        }
+                        </script>
+                    </div>
                 </div>
-                <p style="font-size: 0.75rem; color: #64748b; margin-top: 10px; text-align: right;">* 點擊圖片進入官網查看動態版</p>
             </div>
             
             <div class="card">
                 <h2>✍️ 在線分析報告</h2>
-                
                 <details open>
                     <summary>📁 2026-04-10 市場核心觀點</summary>
                     <div class="report-inner">
-                        1. <strong>MAG 7 分化：</strong> 留意 NVDA 高位盤整，Apple 底部支撐是否穩固。<br>
-                        2. <strong>債市壓力：</strong> 10Y 債息維持在 4.2% 以上，對成長股估值形成壓制。
+                        1. <strong>MAG 7 分化：</strong> 觀察熱力圖中科技板塊的佔比與跌幅。<br>
+                        2. <strong>債市壓力：</strong> 留意 10Y 債息對大盤的壓抑作用。
                     </div>
                 </details>
-
                 <details>
                     <summary>📁 宏觀經濟與政策追蹤</summary>
                     <div class="report-inner">
-                        本月非農數據超預期，美聯儲降息預期延後。目前國債收益率曲線依然呈現倒掛狀態。
+                        通脹數據公佈後，市場對降息預期有所調整。
                     </div>
                 </details>
-
                 <details>
                     <summary>📁 MAG 7 個股技術面筆記</summary>
                     <div class="report-inner">
-                        TSLA 近期跌破關鍵均線；MSFT 雲端業務增長仍是核心看點。
+                        NVDA 保持強勢，其餘巨頭多處於盤整階段。
                     </div>
                 </details>
-
-                <p style="text-align: center; margin-top: 15px;">
-                    <button onclick="alert('功能開發中：未來可在此直接輸入筆記')" style="background: transparent; border: 1px dashed #38bdf8; color: #38bdf8; padding: 8px 20px; border-radius: 6px; cursor: pointer;">+ 新增報告筆記</button>
-                </p>
             </div>
         </div>
 
@@ -137,12 +142,11 @@
                         "locale": "zh_TW",
                         "toolbar_bg": "#f1f3f6",
                         "enable_publishing": false,
-                        "hide_side_toolbar": false, // 強制顯示左側工具欄
+                        "hide_side_toolbar": false,
                         "allow_symbol_change": true,
                         "save_image": true,
                         "details": true,
                         "hotlist": true,
-                        "calendar": true,
                         "watchlist": [
                             "NASDAQ:NVDA","NASDAQ:AAPL","NASDAQ:MSFT","NASDAQ:AMZN",
                             "NASDAQ:GOOGL","NASDAQ:META","NASDAQ:TSLA"
@@ -163,8 +167,6 @@
                             <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
                         </div>
                         {% endfor %}
-                    {% else %}
-                        <p style="color: #64748b; text-align: center;">新聞讀取中...</p>
                     {% endif %}
                 </div>
             </div>
