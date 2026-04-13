@@ -5,54 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Victor Market Intelligence Hub</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #0a1120; color: #f1f5f9; margin: 0; padding: 0; }
-        .dashboard { padding: 20px; max-width: 1400px; margin: 0 auto; }
-        .card { background: #161e2e; border-radius: 12px; border: 1px solid #2d3748; padding: 20px; margin-bottom: 20px; }
-        h2 { font-size: 1.1rem; color: #38bdf8; margin-top: 0; margin-bottom: 15px; border-left: 4px solid #38bdf8; padding-left: 10px; }
+        :root { --primary: #38bdf8; --bg: #0a1120; --card-bg: #161e2e; --text: #f1f5f9; --text-dim: #94a3b8; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        .dashboard { padding: 20px; max-width: 1450px; margin: 0 auto; }
+        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #2d3748; padding: 20px; margin-bottom: 20px; }
+        h2 { font-size: 1.1rem; color: var(--primary); margin-top: 0; margin-bottom: 15px; border-left: 4px solid var(--primary); padding-left: 10px; }
         
+        /* 佈局 */
         .grid-2-1 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
         @media (max-width: 1100px) { .grid-2-1 { grid-template-columns: 1fr; } }
 
-        /* 國債樣式 */
-        .rate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+        /* 數據方塊樣式 */
+        .rate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
         .rate-box { background: #1f293a; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #2d3748; }
-        .rate-val { font-size: 1.2rem; font-weight: bold; color: #ffffff; display: block; margin-top: 5px; }
+        .rate-val { font-size: 1.3rem; font-weight: bold; color: #ffffff; display: block; margin-top: 5px; }
+        .asset-val { color: #fbbf24; } /* 黃金比特幣用金色 */
 
-        /* 分析報告摺疊樣式 */
-        details { background: #1f293a; border-radius: 8px; margin-bottom: 12px; border: 1px solid #334155; }
-        details[open] { border-color: #38bdf8; }
-        summary { padding: 12px 15px; cursor: pointer; font-weight: 600; color: #e2e8f0; outline: none; list-style: none; }
-        summary::-webkit-details-marker { display: none; }
-        summary:hover { background: #2d3748; }
-        .report-inner { padding: 15px; border-top: 1px solid #334155; color: #94a3b8; font-size: 0.95rem; line-height: 1.6; background: #161e2e; }
-
-        /* 熱力圖容器 */
-        .heatmap-container { height: 400px; width: 100%; border-radius: 8px; overflow: hidden; }
-
-        /* 圖表容器 */
-        .chart-frame { height: 600px; width: 100%; border-radius: 8px; overflow: visible; position: relative; }
+        /* 報告列表與抽屜 */
+        .report-item { background: #1f293a; padding: 15px; border-radius: 8px; cursor: pointer; border: 1px solid #334155; margin-bottom: 10px; transition: 0.2s; }
+        .report-item:hover { border-color: var(--primary); background: #2d3748; }
         
-        /* 新聞列表 */
-        .news-list { max-height: 520px; overflow-y: auto; padding-right: 10px; }
+        #reportDrawer {
+            position: fixed; top: 0; right: -650px; width: 550px; height: 100%;
+            background: #111827; box-shadow: -10px 0 30px rgba(0,0,0,0.7);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; padding: 40px; overflow-y: auto;
+            border-left: 2px solid var(--primary);
+        }
+        #reportDrawer.open { right: 0; }
+        .drawer-close { background: none; border: none; color: var(--primary); font-size: 2.5rem; cursor: pointer; position: absolute; top: 10px; right: 20px; }
+
+        /* 圖表與新聞 */
+        .chart-frame { height: 650px; width: 100%; border-radius: 8px; overflow: visible; }
+        .news-list { max-height: 550px; overflow-y: auto; }
         .news-item { padding: 12px 0; border-bottom: 1px solid #2d3748; display: flex; align-items: flex-start; }
-        .news-time { font-size: 0.75rem; color: #64748b; background: #0a1120; padding: 2px 6px; border-radius: 4px; margin-right: 12px; min-width: 45px; text-align: center; }
+        .news-time { font-size: 0.75rem; color: var(--text-dim); background: #0a1120; padding: 2px 6px; border-radius: 4px; margin-right: 12px; }
         .news-link { color: #e2e8f0; text-decoration: none; font-size: 0.95rem; line-height: 1.5; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a1120; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .news-link:hover { color: var(--primary); }
+
+        /* Markdown 內容渲染優化 */
+        .markdown-content { line-height: 1.8; color: #cbd5e1; }
+        .markdown-content h1, .markdown-content h2 { color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div style="border-bottom: 1px solid #2d3748; background: #161e2e;">
+    <div style="border-bottom: 1px solid #2d3748;">
         <div class="tradingview-widget-container">
             <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
             { "symbols": [
                 {"proName": "NASDAQ:NVDA", "title": "NVDA"}, {"proName": "NASDAQ:AAPL", "title": "AAPL"},
-                {"proName": "NASDAQ:MSFT", "title": "MSFT"}, {"proName": "NASDAQ:TSLA", "title": "TSLA"},
-                {"proName": "INDEX:HSI", "title": "恒指"}, {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500"}
-            ], "colorTheme": "dark", "isTransparent": false, "displayMode": "adaptive", "locale": "zh_TW" }
+                {"proName": "NASDAQ:TSLA", "title": "TSLA"}, {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500"}
+            ], "colorTheme": "dark", "locale": "zh_TW" }
             </script>
         </div>
     </div>
@@ -60,41 +63,40 @@
     <div class="dashboard">
         
         <div class="card">
-            <h2>美國國債收益率</h2>
+            <h2>🇺🇸 美國國債收益率 (Treasury Yields)</h2>
             <div class="rate-grid">
-                {% if rates %}
-                    {% for label, val in rates.items() %}
-                    <div class="rate-box">
-                        <small style="color:#94a3b8">{{ label }}期</small>
-                        <span class="rate-val">{{ val }}</span>
-                    </div>
-                    {% endfor %}
-                {% endif %}
+                {% for label, val in rates.items() %}
+                <div class="rate-box">
+                    <small style="color:var(--text-dim)">{{ label }}期</small>
+                    <span class="rate-val">{{ val }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💰 市場關鍵指標 (Commodities & FX)</h2>
+            <div class="rate-grid">
+                {% for name, price in other_assets.items() %}
+                <div class="rate-box">
+                    <small style="color:var(--text-dim)">{{ name }}</small>
+                    <span class="rate-val asset-val">{{ price }}</span>
+                </div>
+                {% endfor %}
             </div>
         </div>
 
         <div class="grid-2-1">
             <div class="card">
                 <h2>📊 全球市場熱力圖 (S&P 500)</h2>
-                <div class="heatmap-container">
+                <div style="height: 400px;">
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
                         {
-                          "exchanges": [],
-                          "dataSource": "S&P500",
-                          "grouping": "sector",
-                          "blockSize": "market_cap_basic",
-                          "blockColor": "change",
-                          "locale": "zh_TW",
-                          "symbolUrl": "",
-                          "colorTheme": "dark",
-                          "hasTopBar": false,
-                          "isDatasetEnabled": false,
-                          "isTransparent": false,
-                          "hasSymbolTooltip": true,
-                          "width": "100%",
-                          "height": "100%"
+                          "dataSource": "S&P500", "grouping": "sector", "blockSize": "market_cap_basic",
+                          "blockColor": "change", "locale": "zh_TW", "colorTheme": "dark",
+                          "width": "100%", "height": "100%"
                         }
                         </script>
                     </div>
@@ -102,56 +104,32 @@
             </div>
             
             <div class="card">
-                <h2>✍️ 在線分析報告</h2>
-                <details open>
-                    <summary>📁 2026-04-10 市場核心觀點</summary>
-                    <div class="report-inner">
-                        1. <strong>MAG 7 分化：</strong> 觀察熱力圖中科技板塊的佔比與跌幅。<br>
-                        2. <strong>債市壓力：</strong> 留意 10Y 債息對大盤的壓抑作用。
+                <h2>✍️ 深度分析報告庫</h2>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    {% for report in reports %}
+                    <div class="report-item" onclick="openDrawer('{{ report.title }}', {{ report.content | tojson }})">
+                        <div style="font-weight:600; margin-bottom:4px;">📁 {{ report.title }}</div>
+                        <small style="color:var(--text-dim)">點擊開啟 2000 字深度分析</small>
                     </div>
-                </details>
-                <details>
-                    <summary>📁 宏觀經濟與政策追蹤</summary>
-                    <div class="report-inner">
-                        通脹數據公佈後，市場對降息預期有所調整。
-                    </div>
-                </details>
-                <details>
-                    <summary>📁 MAG 7 個股技術面筆記</summary>
-                    <div class="report-inner">
-                        NVDA 保持強勢，其餘巨頭多處於盤整階段。
-                    </div>
-                </details>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
         <div class="grid-2-1">
             <div class="card" style="padding: 10px;">
-                <h2 style="margin: 10px 0 15px 10px;">🚀 MAG 7 最新資訊</h2>
+                <h2 style="margin: 10px 0 15px 10px;">🚀 市場即時圖表分析</h2>
                 <div class="chart-frame">
-                    <div id="tv_mag7" style="height:100%;width:100%"></div>
+                    <div id="tv_main_chart" style="height:100%;width:100%"></div>
                     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
                     <script type="text/javascript">
                     new TradingView.widget({
-                        "autosize": true,
-                        "symbol": "NASDAQ:NVDA",
-                        "interval": "D",
-                        "timezone": "America/New_York",
-                        "theme": "dark",
-                        "style": "1",
-                        "locale": "zh_TW",
-                        "toolbar_bg": "#f1f3f6",
-                        "enable_publishing": false,
-                        "hide_side_toolbar": false,
-                        "allow_symbol_change": true,
-                        "save_image": true,
-                        "details": true,
-                        "hotlist": true,
-                        "watchlist": [
-                            "NASDAQ:NVDA","NASDAQ:AAPL","NASDAQ:MSFT","NASDAQ:AMZN",
-                            "NASDAQ:GOOGL","NASDAQ:META","NASDAQ:TSLA"
-                        ],
-                        "container_id": "tv_mag7"
+                        "autosize": true, "symbol": "NASDAQ:NVDA", "interval": "D",
+                        "timezone": "America/New_York", "theme": "dark", "style": "1",
+                        "locale": "zh_TW", "hide_side_toolbar": false, // 確保工具欄不被裁切
+                        "allow_symbol_change": true, "details": true, "hotlist": true,
+                        "watchlist": ["NASDAQ:ISRG", "NYSE:PTY", "NYSE:DB", "NYSE:MRK", "NYSE:TSN", "NASDAQ:NVDA", "NASDAQ:RKLB", "BATS:AR"],
+                        "container_id": "tv_main_chart"
                     });
                     </script>
                 </div>
@@ -160,18 +138,32 @@
             <div class="card">
                 <h2>🏮 Yahoo 財經即時快訊 (中文)</h2>
                 <div class="news-list">
-                    {% if news %}
-                        {% for item in news %}
-                        <div class="news-item">
-                            <span class="news-time">{{ item.time }}</span>
-                            <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
+                    {% for item in news %}
+                    <div class="news-item">
+                        <span class="news-time">{{ item.time }}</span>
+                        <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-
     </div>
+
+    <div id="reportDrawer">
+        <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+        <h1 id="drawerTitle" style="color:var(--primary); margin-bottom:25px;"></h1>
+        <div id="drawerBody" class="markdown-content"></div>
+    </div>
+
+    <script>
+        function openDrawer(title, content) {
+            document.getElementById('drawerTitle').innerText = title;
+            document.getElementById('drawerBody').innerHTML = content;
+            document.getElementById('reportDrawer').classList.add('open');
+        }
+        function closeDrawer() {
+            document.getElementById('reportDrawer').classList.remove('open');
+        }
+    </script>
 </body>
 </html>
