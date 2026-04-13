@@ -16,13 +16,13 @@
         .rate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .rate-box { background: #1f293a; padding: 18px; border-radius: 10px; text-align: center; border: 1px solid #2d3748; }
         .rate-val { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: block; margin-top: 5px; }
-        .asset-val { color: var(--accent); }
 
         .report-item { background: #1f293a; padding: 15px; border-radius: 8px; cursor: pointer; border: 1px solid #334155; margin-bottom: 10px; transition: 0.2s; }
         .report-item:hover { border-color: var(--primary); background: #2d3748; }
         
+        /* 抽屜樣式 */
         #reportDrawer {
-            position: fixed; top: 0; right: -650px; width: 600px; height: 100%;
+            position: fixed; top: 0; right: -750px; width: 700px; height: 100%;
             background: #111827; box-shadow: -10px 0 30px rgba(0,0,0,0.8);
             transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10000; padding: 40px; overflow-y: auto;
             border-left: 2px solid var(--primary);
@@ -30,15 +30,13 @@
         #reportDrawer.open { right: 0; }
         .drawer-close { background: none; border: none; color: var(--primary); font-size: 2.5rem; cursor: pointer; position: absolute; top: 10px; right: 20px; }
 
-        .markdown-content { line-height: 1.8; color: #cbd5e1; font-size: 1.05rem; }
-        .markdown-content h1, .markdown-content h2 { color: var(--primary); border-bottom: 1px solid #2d3748; padding-bottom: 10px; }
-        .markdown-content strong { color: var(--accent); }
-
+        .markdown-content { line-height: 1.8; color: #cbd5e1; }
+        .markdown-content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .markdown-content th, td { border: 1px solid #334155; padding: 10px; }
+        
         .news-list { max-height: 500px; overflow-y: auto; }
         .news-item { padding: 12px 0; border-bottom: 1px solid #2d3748; display: flex; align-items: flex-start; }
-        .news-time { font-size: 0.75rem; color: var(--text-dim); background: #0a1120; padding: 2px 6px; border-radius: 4px; margin-right: 12px; }
         .news-link { color: #e2e8f0; text-decoration: none; font-size: 0.95rem; }
-        .news-link:hover { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -56,25 +54,19 @@
 
     <div class="dashboard">
         <div class="card">
-            <h2>🇺🇸 美國國債收益率 (Treasury Yields)</h2>
+            <h2>🇺🇸 美國國債收益率</h2>
             <div class="rate-grid">
                 {% for label, val in rates.items() %}
-                <div class="rate-box">
-                    <small style="color:var(--text-dim)">{{ label }}期</small>
-                    <span class="rate-val">{{ val }}</span>
-                </div>
+                <div class="rate-box"><small style="color:var(--text-dim)">{{ label }}期</small><span class="rate-val">{{ val }}</span></div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="card">
-            <h2>💰 市場關鍵指標 (Commodities & FX)</h2>
+            <h2>💰 市場關鍵指標</h2>
             <div class="rate-grid">
                 {% for name, price in other_assets.items() %}
-                <div class="rate-box">
-                    <small style="color:var(--text-dim)">{{ name }}</small>
-                    <span class="rate-val asset-val">{{ price }}</span>
-                </div>
+                <div class="rate-box"><small style="color:var(--text-dim)">{{ name }}</small><span class="rate-val" style="color:var(--accent)">{{ price }}</span></div>
                 {% endfor %}
             </div>
         </div>
@@ -92,13 +84,18 @@
             </div>
             
             <div class="card">
-                <h2>✍️ 深度分析報告庫</h2>
+                <h2>✍️ 深度分析報告庫 (MD/PDF)</h2>
                 <div style="max-height: 400px; overflow-y: auto;">
                     {% for report in reports %}
-                    <div class="report-item" onclick='openDrawer({{ report.title | tojson }}, {{ report.content | tojson }})'>
-                        <div style="font-weight:600;">📁 {{ report.title }}</div>
-                        <small style="color:var(--text-dim)">點擊閱讀長篇分析</small>
-                    </div>
+                        {% if report.type == 'md' %}
+                        <div class="report-item" onclick='openDrawer({{ report.title | tojson }}, {{ report.content | tojson }}, "md")'>
+                            <div style="font-weight:600;">📁 {{ report.title }}</div>
+                        {% else %}
+                        <div class="report-item" onclick='openDrawer({{ report.title | tojson }}, "/reports/{{ report.filename }}", "pdf")'>
+                            <div style="font-weight:600; color:var(--accent);">📄 {{ report.title }} (PDF)</div>
+                        {% endif %}
+                            <small style="color:var(--text-dim)">點擊閱讀全文</small>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
@@ -113,18 +110,18 @@
                 new TradingView.widget({
                     "autosize": true, "symbol": "NASDAQ:NVDA", "interval": "D", "theme": "dark", "style": "1", "locale": "zh_TW",
                     "hide_side_toolbar": false, "allow_symbol_change": true, "details": true,
-                    "watchlist": ["NASDAQ:ISRG", "NYSE:PTY", "NYSE:DB", "NYSE:MRK", "NYSE:TSN", "NASDAQ:NVDA", "NASDAQ:RKLB", "BATS:AR"],
+                    "watchlist": ["NASDAQ:ISRG", "NYSE:PTY", "NYSE:DB", "NYSE:MRK", "NYSE:TSN", "NASDAQ:NVDA", "NASDAQ:RKLB"],
                     "container_id": "tv_main_chart"
                 });
                 </script>
             </div>
 
             <div class="card">
-                <h2>🏮 Yahoo 財經即時快訊 (中文)</h2>
+                <h2>🏮 Yahoo 財經即時快訊</h2>
                 <div class="news-list">
                     {% for item in news %}
                     <div class="news-item">
-                        <span class="news-time">{{ item.time }}</span>
+                        <span style="font-size:0.75rem; color:var(--text-dim); margin-right:10px;">{{ item.time }}</span>
                         <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
                     </div>
                     {% endfor %}
@@ -135,17 +132,26 @@
 
     <div id="reportDrawer">
         <button class="drawer-close" onclick="closeDrawer()">&times;</button>
-        <h1 id="drawerTitle" style="color:var(--primary);"></h1>
+        <h1 id="drawerTitle" style="color:var(--primary); margin-bottom:0;"></h1>
         <hr style="border:0; border-top:1px solid #2d3748; margin:20px 0;">
         <div id="drawerBody" class="markdown-content"></div>
     </div>
 
     <script>
-        function openDrawer(title, htmlContent) {
+        function openDrawer(title, data, type) {
             document.getElementById('drawerTitle').innerText = title;
-            document.getElementById('drawerBody').innerHTML = htmlContent;
+            const bodyEl = document.getElementById('drawerBody');
+            
+            if (type === "md") {
+                bodyEl.innerHTML = data;
+            } else if (type === "pdf") {
+                // 嵌入 PDF 預覽器
+                bodyEl.innerHTML = `<iframe src="${data}" width="100%" height="85vh" style="border:none; border-radius:8px;"></iframe>`;
+            }
+            
             document.getElementById('reportDrawer').classList.add('open');
         }
+
         function closeDrawer() {
             document.getElementById('reportDrawer').classList.remove('open');
         }
