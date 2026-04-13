@@ -4,34 +4,40 @@
     <meta charset="UTF-8">
     <title>Victor Market Intelligence Hub</title>
     <style>
-        :root { --primary: #38bdf8; --bg: #0a1120; --card-bg: #161e2e; --text: #f1f5f9; --accent: #fbbf24; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        :root { --primary: #38bdf8; --bg: #0a1120; --card-bg: #161e2e; --text: #f1f5f9; --text-dim: #94a3b8; --accent: #fbbf24; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         .dashboard { padding: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #2d3748; padding: 20px; margin-bottom: 20px; }
-        h2 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 10px; font-size: 1.1rem; }
+        h2 { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 10px; font-size: 1.1rem; margin-top: 0; }
         
         .grid-2-1 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
         .rate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .rate-box { background: #1f293a; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #2d3748; }
+        .rate-val { font-size: 1.3rem; font-weight: bold; display: block; margin-top: 5px; }
 
         .report-item { background: #1f293a; padding: 15px; border-radius: 8px; cursor: pointer; border: 1px solid #334155; margin-bottom: 10px; transition: 0.2s; }
         .report-item:hover { border-color: var(--primary); background: #2d3748; }
 
-        /* 抽屜樣式：寬度 800px 以利 PDF 閱讀 */
+        /* 側邊抽屜優化 */
         #reportDrawer {
-            position: fixed; top: 0; right: -850px; width: 800px; height: 100%;
+            position: fixed; top: 0; right: -900px; width: 850px; height: 100%;
             background: #111827; box-shadow: -15px 0 35px rgba(0,0,0,0.9);
-            transition: 0.4s ease-in-out; z-index: 10000; padding: 30px; overflow: hidden;
-            border-left: 3px solid var(--primary);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10000; padding: 30px; border-left: 3px solid var(--primary);
         }
         #reportDrawer.open { right: 0; }
         .drawer-close { background: none; border: none; color: var(--primary); font-size: 2.5rem; cursor: pointer; position: absolute; top: 10px; right: 20px; }
-
         #drawerContent { height: 100%; overflow-y: auto; padding-top: 20px; }
-        .pdf-viewer { width: 100%; height: calc(100vh - 150px); border: none; border-radius: 8px; }
-        
-        .news-list { max-height: 500px; overflow-y: auto; }
-        .news-link { color: #e2e8f0; text-decoration: none; font-size: 0.9rem; }
+
+        /* PDF & Markdown 顯示優化 */
+        .pdf-viewer { width: 100%; height: calc(100vh - 160px); border: none; border-radius: 8px; background: #fff; }
+        .markdown-content { line-height: 1.8; color: #cbd5e1; }
+        .markdown-content table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .markdown-content th, .markdown-content td { border: 1px solid #334155; padding: 10px; text-align: left; }
+
+        .news-list { height: 500px; overflow-y: auto; }
+        .news-item { padding: 12px 0; border-bottom: 1px solid #2d3748; }
+        .news-link { color: #e2e8f0; text-decoration: none; font-size: 0.95rem; line-height: 1.4; }
+        .news-link:hover { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -41,7 +47,7 @@
             <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
             { "symbols": [
                 {"proName": "NASDAQ:NVDA", "title": "NVDA"}, {"proName": "NASDAQ:AAPL", "title": "AAPL"},
-                {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500"}, {"proName": "FX_IDC:GBPHKD", "title": "GBP/HKD"}
+                {"proName": "NASDAQ:TSLA", "title": "TSLA"}, {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500"}
             ], "colorTheme": "dark", "locale": "zh_TW" }
             </script>
         </div>
@@ -49,13 +55,13 @@
 
     <div class="dashboard">
         <div class="card">
-            <h2>🇺🇸 市場實時指標</h2>
+            <h2>🌍 市場實時數據</h2>
             <div class="rate-grid">
                 {% for label, val in rates.items() %}
-                <div class="rate-box"><small>{{ label }}期國債</small><br><strong>{{ val }}</strong></div>
+                <div class="rate-box"><small>{{ label }}期國債</small><span class="rate-val">{{ val }}</span></div>
                 {% endfor %}
                 {% for name, price in other_assets.items() %}
-                <div class="rate-box" style="border-color:var(--accent);"><small>{{ name }}</small><br><strong style="color:var(--accent)">{{ price }}</strong></div>
+                <div class="rate-box" style="border-color:var(--accent)"><small>{{ name }}</small><span class="rate-val" style="color:var(--accent)">{{ price }}</span></div>
                 {% endfor %}
             </div>
         </div>
@@ -63,7 +69,7 @@
         <div class="grid-2-1">
             <div class="card">
                 <h2>📊 全球市場熱力圖 (S&P 500)</h2>
-                <div style="height: 500px;">
+                <div style="height: 480px;">
                     <div class="tradingview-widget-container">
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
                         { "dataSource": "S&P500", "blockSize": "market_cap_basic", "blockColor": "change", "locale": "zh_TW", "colorTheme": "dark", "width": "100%", "height": "100%" }
@@ -73,14 +79,13 @@
             </div>
             
             <div class="card">
-                <h2>✍️ 分析報告庫</h2>
-                <div style="max-height: 500px; overflow-y: auto;">
+                <h2>✍️ 分析報告庫 (MD/PDF)</h2>
+                <div style="max-height: 480px; overflow-y: auto;">
                     {% for report in reports %}
-                        <div class="report-item" 
-                             onclick='openDrawer({{ report.title | tojson }}, {{ (report.content if report.type == "md" else "/reports/" + report.filename) | tojson }}, "{{ report.type }}")'>
-                            <strong>{{ "📄" if report.type == "pdf" else "📁" }} {{ report.title }}</strong>
-                            <br><small style="color:#94a3b8;">{{ "PDF 報表" if report.type == "pdf" else "文字報告" }}</small>
-                        </div>
+                    <div class="report-item" onclick='openDrawer({{ report.title | tojson }}, {{ (report.content if report.type == "md" else "/reports/" + report.filename) | tojson }}, "{{ report.type }}")'>
+                        <strong>{{ "📄" if report.type == "pdf" else "📁" }} {{ report.title }}</strong><br>
+                        <small style="color:var(--text-dim)">點擊閱讀全文分析</small>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -102,11 +107,11 @@
             </div>
 
             <div class="card">
-                <h2>🏮 Yahoo 財經即時快訊</h2>
+                <h2>🏮 Yahoo 財經即時快訊 (10則)</h2>
                 <div class="news-list">
                     {% for item in news %}
-                    <div style="padding:10px 0; border-bottom:1px solid #2d3748;">
-                        <span style="color:var(--text-dim); font-size:0.8rem;">{{ item.time }}</span><br>
+                    <div class="news-item">
+                        <span style="font-size:0.75rem; color:var(--text-dim); background:#0a1120; padding:2px 5px; border-radius:4px;">{{ item.time }}</span><br>
                         <a class="news-link" href="{{ item.link }}" target="_blank">{{ item.title }}</a>
                     </div>
                     {% endfor %}
@@ -118,7 +123,7 @@
     <div id="reportDrawer">
         <button class="drawer-close" onclick="closeDrawer()">&times;</button>
         <div id="drawerContent">
-            <h1 id="drawerTitle" style="color:var(--primary);"></h1>
+            <h1 id="drawerTitle" style="color:var(--primary); margin-top:0;"></h1>
             <hr style="border:0; border-top:1px solid #2d3748; margin:20px 0;">
             <div id="drawerBody"></div>
         </div>
@@ -131,14 +136,14 @@
             if (type === "md") {
                 bodyEl.innerHTML = `<div class="markdown-content">${data}</div>`;
             } else {
-                // 優化後的 PDF 嵌入，強制符合寬度
+                // PDF 嵌入優化，加入 FitH 參數自動符合寬度
                 bodyEl.innerHTML = `<iframe src="${data}#view=FitH" class="pdf-viewer"></iframe>`;
             }
             document.getElementById('reportDrawer').classList.add('open');
         }
         function closeDrawer() {
             document.getElementById('reportDrawer').classList.remove('open');
-            document.getElementById('drawerBody').innerHTML = '';
+            setTimeout(() => { document.getElementById('drawerBody').innerHTML = ''; }, 400);
         }
     </script>
 </body>
