@@ -2,10 +2,11 @@ import os
 import markdown
 import feedparser
 import yfinance as yf
-from flask import Flask, render_template, json
+from flask import Flask, render_template, send_from_directory
 
 app = Flask(__name__)
 
+# 確保報告資料夾存在
 REPORTS_DIR = 'reports'
 if not os.path.exists(REPORTS_DIR):
     os.makedirs(REPORTS_DIR)
@@ -20,7 +21,7 @@ def get_market_data():
         except:
             rates[label] = "N/A"
 
-    # 2. 市場關鍵指標 (金、銀、比特幣、匯率)
+    # 2. 市場關鍵指標
     asset_tickers = {"黃金價格": "GC=F", "白銀價格": "SI=F", "BITCOIN價格": "BTC-USD", "英鎊/港元": "GBPHKD=X"}
     other_assets = {}
     for name, ticker in asset_tickers.items():
@@ -30,7 +31,7 @@ def get_market_data():
         except:
             other_assets[name] = "N/A"
 
-    # 3. Yahoo 新聞 (10則)
+    # 3. Yahoo 新聞
     news_data = []
     try:
         feed = feedparser.parse("https://hk.finance.yahoo.com/news/rss")
@@ -49,20 +50,39 @@ def get_reports():
     reports_list = []
     if not os.path.exists(REPORTS_DIR): return reports_list
     
-    files = sorted([f for f in os.listdir(REPORTS_DIR) if f.endswith('.md')], reverse=True)
+    # 同時獲取 .md 和 .pdf 檔案
+    files = sorted([f for f in os.listdir(REPORTS_DIR) if f.endswith(('.md', '.pdf'))], reverse=True)
+    
     for filename in files:
+        display_title = filename.replace('.md', '').replace('.pdf', '').replace('-', ' ')
+        file_path = os.path.join(REPORTS_DIR, filename)
+        
         try:
-            with open(os.path.join(REPORTS_DIR, filename), 'r', encoding='utf-8') as f:
-                text = f.read()
-                # 啟用擴展以支援表格與進階格式
-                html_content = markdown.markdown(text, extensions=['extra', 'tables', 'fenced_code'])
+            if filename.endswith('.md'):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    text = f.read()
+                    html_content = markdown.markdown(text, extensions=['extra', 'tables', 'fenced_code'])
+                    reports_list.append({
+                        "title": display_title,
+                        "content": html_content,
+                        "type": "md"
+                    })
+            elif filename.endswith('.pdf'):
+                # PDF 僅傳遞檔案名稱，由前端 serve_report 讀取
                 reports_list.append({
-                    "title": filename.replace('.md', '').replace('-', ' '),
-                    "content": html_content
+                    "title": display_title,
+                    "filename": filename,
+                    "type": "pdf"
                 })
         except Exception as e:
-            print(f"Error reading {filename}: {e}")
+            print(f"Error loading {filename}: {e}")
+            
     return reports_list
+
+# 提供 PDF 檔案的路由
+@app.route('/reports/<path:filename>')
+def serve_report(filename):
+    return send_from_directory(REPORTS_DIR, filename)
 
 @app.route('/')
 def index():
