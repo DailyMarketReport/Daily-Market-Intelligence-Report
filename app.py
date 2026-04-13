@@ -6,7 +6,7 @@ from flask import Flask, render_template, send_from_directory
 
 app = Flask(__name__)
 
-# 確保報告資料夾存在
+# 確保路徑與資料夾存在
 REPORTS_DIR = 'reports'
 if not os.path.exists(REPORTS_DIR):
     os.makedirs(REPORTS_DIR)
@@ -31,12 +31,13 @@ def get_market_data():
         except:
             other_assets[name] = "N/A"
 
-    # 3. 強化版 Yahoo 新聞抓取 (確保 10 則)
+    # 3. 強化版新聞抓取：確保解析 10 則並處理時間格式
     news_data = []
     try:
         feed = feedparser.parse("https://hk.finance.yahoo.com/news/rss")
         for entry in feed.entries[:10]:
             raw_time = entry.get('published', '')
+            # 擷取 RSS 時間中的時分部分 (例如 09:30)
             display_time = raw_time[17:22] if len(raw_time) > 22 else "--:--"
             news_data.append({
                 "title": entry.get('title', '無標題'),
@@ -44,7 +45,7 @@ def get_market_data():
                 "time": display_time
             })
     except:
-        news_data = [{"title": "新聞加載失敗", "link": "#", "time": "--"}]
+        news_data = [{"title": "新聞加載暫時失效", "link": "#", "time": "--:--"}]
 
     return rates, other_assets, news_data
 
@@ -52,6 +53,7 @@ def get_reports():
     reports_list = []
     if not os.path.exists(REPORTS_DIR): return reports_list
     
+    # 讀取 MD 與 PDF
     files = sorted([f for f in os.listdir(REPORTS_DIR) if f.endswith(('.md', '.pdf'))], reverse=True)
     for filename in files:
         display_title = filename.replace('.md', '').replace('.pdf', '').replace('-', ' ')
@@ -63,7 +65,7 @@ def get_reports():
             elif filename.endswith('.pdf'):
                 reports_list.append({"title": display_title, "filename": filename, "type": "pdf"})
         except:
-            pass
+            continue
     return reports_list
 
 @app.route('/reports/<path:filename>')
